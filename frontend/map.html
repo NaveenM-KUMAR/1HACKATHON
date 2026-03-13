@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Map — Raksha Nethra</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/frontend/css/main.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+body { overflow: hidden; }
+.app-shell { height: 100vh; }
+.main-content { display: flex; flex-direction: column; }
+.map-page-layout { flex: 1; display: flex; overflow: hidden; }
+#map { flex: 1; }
+.map-sidebar {
+  width: 300px; background: var(--bg2);
+  border-left: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.map-sidebar-header {
+  padding: 14px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  font-weight: 600; font-size: 0.85rem;
+}
+.map-list { flex: 1; overflow-y: auto; }
+.map-list-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 11px 14px; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background 0.2s;
+}
+.map-list-item:hover { background: var(--surface-h); }
+.layer-toggle {
+  display: flex; gap: 6px; padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.layer-btn {
+  flex: 1; padding: 5px 8px; border-radius: 6px;
+  font-size: 0.72rem; font-weight: 600;
+  background: var(--surface); color: var(--text-2);
+  border: 1px solid var(--border); cursor: pointer;
+  transition: all 0.2s; text-align: center;
+}
+.layer-btn.active { background: var(--cyan-dim); color: var(--cyan); border-color: var(--cyan); }
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-orb"></div>
+    <div class="logo-text">Raksha <span>Nethra</span></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a href="/frontend/dashboard.html" class="nav-link"><span class="nav-icon">📊</span>Dashboard</a>
+    <a href="/frontend/report.html"    class="nav-link"><span class="nav-icon">📝</span>Report Issue</a>
+    <a href="/frontend/map.html"       class="nav-link active"><span class="nav-icon">🗺️</span>Live Map</a>
+    <div class="nav-section-label" style="margin-top:10px">Analytics</div>
+    <a href="/frontend/analytics.html" class="nav-link"><span class="nav-icon">📈</span>Analytics</a>
+    <a href="/frontend/alerts.html"    class="nav-link"><span class="nav-icon">🚨</span>Community Alerts</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar" id="sidebar-user-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-user-name">Loading...</div>
+        <div class="user-role" id="sidebar-user-role">—</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="RN.clearAuth();window.location.href='/frontend/login.html'">⟲ Sign Out</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-content">
+  <header class="top-header">
+    <div>
+      <div class="page-title">🗺️ Live Civic Map</div>
+      <div class="page-sub">Real-time complaint markers & risk heatmap</div>
+    </div>
+    <div class="header-right">
+      <div class="header-badge" onclick="loadMapData()"><div class="live-dot"></div>Refresh</div>
+      <span id="markerCount" style="font-size:0.78rem;color:var(--text-3)">Loading...</span>
+    </div>
+  </header>
+
+  <div class="map-page-layout">
+    <div id="map"></div>
+
+    <div class="map-sidebar">
+      <div class="map-sidebar-header">
+        <span>📍 Complaints</span>
+        <span id="listCount" style="font-size:0.75rem;color:var(--text-3)"></span>
+      </div>
+
+      <div class="layer-toggle">
+        <button class="layer-btn active" id="btnMarkers" onclick="toggleLayer('markers')">📍 Markers</button>
+        <button class="layer-btn" id="btnHeat" onclick="toggleLayer('heat')">🔥 Heatmap</button>
+      </div>
+
+      <!-- Filter chips -->
+      <div style="padding:10px 14px;border-bottom:1px solid var(--border)">
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="filter-chip chip-all active" onclick="filterMarkers('all',this)">All</button>
+          <button class="filter-chip chip-pothole" onclick="filterMarkers('pothole',this)">Pothole</button>
+          <button class="filter-chip chip-garbage" onclick="filterMarkers('garbage',this)">Garbage</button>
+          <button class="filter-chip chip-streetlight" onclick="filterMarkers('streetlight',this)">Streetlight</button>
+          <button class="filter-chip chip-water_leak" onclick="filterMarkers('water_leak',this)">Water</button>
+        </div>
+      </div>
+
+      <div class="map-list" id="mapList">
+        <div style="padding:20px;text-align:center"><div class="spinner"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<div id="toast-container"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<script src="/frontend/js/api.js"></script>
+<script>
+if(!RN.requireAuth()) throw '';
+RN.populateSidebar();
+
+const COLORS = { pothole:'#ff3b5c', garbage:'#ffa500', streetlight:'#aaaaaa', water_leak:'#64b5f6' };
+const EMOJIS = { pothole:'🛣️', garbage:'🗑️', streetlight:'💡', water_leak:'💧' };
+
+// Init Leaflet map (centered on India)
+const map = L.map('map', { zoomControl: true }).setView([20.5937, 78.9629], 5);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution:'© OpenStreetMap © CARTO', maxZoom: 19
+}).addTo(map);
+
+let markersLayer = L.layerGroup().addTo(map);
+let heatLayer = null;
+let allComplaints = [];
+let activeFilter = 'all';
+let showMarkers = true;
+
+function makeIcon(type) {
+  const color = COLORS[type] || '#888';
+  return L.divIcon({
+    className: '',
+    html: `<div style="
+      width:28px;height:28px;border-radius:50% 50% 50% 0;
+      background:${color};border:2px solid rgba(255,255,255,0.8);
+      transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,0.5);
+      display:flex;align-items:center;justify-content:center;
+    "><div style="transform:rotate(45deg);font-size:12px">${EMOJIS[type]||'📍'}</div></div>`,
+    iconSize:[28,28], iconAnchor:[14,28], popupAnchor:[0,-30]
+  });
+}
+
+function renderMarkers(data) {
+  markersLayer.clearLayers();
+  const filtered = activeFilter==='all' ? data : data.filter(c=>c.issue_type===activeFilter);
+  filtered.forEach(c => {
+    const marker = L.marker([c.latitude, c.longitude], { icon: makeIcon(c.issue_type) });
+    marker.bindPopup(`
+      <div style="min-width:200px">
+        <div style="font-size:1rem;margin-bottom:6px">${EMOJIS[c.issue_type]||'📍'} <strong style="text-transform:capitalize">${RN.capitalize(c.issue_type)}</strong></div>
+        <div style="font-size:0.78rem;color:#aaa;margin-bottom:6px">${c.description||'No description'}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span style="font-size:0.7rem;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,0.1)">${RN.capitalize(c.priority)||'medium'}</span>
+          <span style="font-size:0.7rem;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,0.1)">${RN.capitalize(c.status)||'pending'}</span>
+        </div>
+      </div>`);
+    markersLayer.addLayer(marker);
+  });
+  document.getElementById('markerCount').textContent = `${filtered.length} markers shown`;
+  renderList(filtered);
+}
+
+function renderList(data) {
+  const list = document.getElementById('mapList');
+  document.getElementById('listCount').textContent = `${data.length} items`;
+  if (!data.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📍</div><div class="empty-state-text">No complaints in this area</div></div>`;
+    return;
+  }
+  list.innerHTML = data.map(c=>`
+    <div class="map-list-item" onclick="flyTo(${c.latitude},${c.longitude})">
+      <div class="map-dot ${c.issue_type}"></div>
+      <div class="map-item-body">
+        <div class="map-item-title">${RN.capitalize(c.issue_type)}</div>
+        <div class="map-item-desc">${c.description||'No description'}</div>
+        <div style="font-size:0.7rem;color:var(--text-3);margin-top:3px">${c.latitude?.toFixed(4)}, ${c.longitude?.toFixed(4)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function flyTo(lat, lon) {
+  map.flyTo([lat, lon], 16, { animate: true, duration: 0.8 });
+}
+
+function filterMarkers(type, btn) {
+  activeFilter = type;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  renderMarkers(allComplaints);
+}
+
+function toggleLayer(layer) {
+  if(layer==='markers') {
+    showMarkers = !showMarkers;
+    if(showMarkers) map.addLayer(markersLayer); else map.removeLayer(markersLayer);
+    document.getElementById('btnMarkers').classList.toggle('active', showMarkers);
+  } else {
+    if(heatLayer && map.hasLayer(heatLayer)) {
+      map.removeLayer(heatLayer);
+      document.getElementById('btnHeat').classList.remove('active');
+    } else if(heatLayer) {
+      map.addLayer(heatLayer);
+      document.getElementById('btnHeat').classList.add('active');
+    } else {
+      RN.toast('Loading heatmap...','info');
+      RN.map.heatmap().then(data => {
+        if (!data || !data.length) { RN.toast('No heatmap data yet','info'); return; }
+        const pts = data.map(p => [p.lat, p.lon, p.intensity]);
+        heatLayer = L.heatLayer(pts, { radius:35, blur:25, maxZoom:10, max:1.0,
+          gradient:{0.4:'#00e5ff', 0.65:'#9b5de5', 1:'#ff3b5c'} }).addTo(map);
+        document.getElementById('btnHeat').classList.add('active');
+      });
+    }
+  }
+}
+
+async function loadMapData() {
+  try {
+    const data = await RN.map.complaints();
+    if(!data) return;
+    allComplaints = data;
+    renderMarkers(data);
+    if(data.length) {
+      const center = data.reduce((a,c)=>({lat:a.lat+c.latitude/data.length,lng:a.lng+c.longitude/data.length}),{lat:0,lng:0});
+      map.flyTo([center.lat,center.lng], 10, {animate:true});
+    }
+  } catch(e) { RN.toast('Failed to load map data: '+e.message,'error'); }
+}
+loadMapData();
+</script>
+</body>
+</html>

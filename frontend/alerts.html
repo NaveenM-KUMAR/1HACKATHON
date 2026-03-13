@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Community Alerts — Raksha Nethra</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/frontend/css/main.css">
+</head>
+<body>
+<div class="app-shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-orb"></div>
+    <div class="logo-text">Raksha <span>Nethra</span></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a href="/frontend/dashboard.html" class="nav-link"><span class="nav-icon">📊</span>Dashboard</a>
+    <a href="/frontend/report.html"    class="nav-link"><span class="nav-icon">📝</span>Report Issue</a>
+    <a href="/frontend/map.html"       class="nav-link"><span class="nav-icon">🗺️</span>Live Map</a>
+    <div class="nav-section-label" style="margin-top:10px">Analytics</div>
+    <a href="/frontend/analytics.html" class="nav-link"><span class="nav-icon">📈</span>Analytics</a>
+    <a href="/frontend/alerts.html"    class="nav-link active"><span class="nav-icon">🚨</span>Community Alerts</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar" id="sidebar-user-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-user-name">Loading...</div>
+        <div class="user-role" id="sidebar-user-role">—</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="RN.clearAuth();window.location.href='/frontend/login.html'">⟲ Sign Out</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-content">
+  <header class="top-header">
+    <div>
+      <div class="page-title">🚨 Community Alerts</div>
+      <div class="page-sub">Cluster alerts, emergencies & SOS history</div>
+    </div>
+    <div class="header-right">
+      <div class="header-badge" onclick="loadAlerts()"><div class="live-dot"></div>Live Feed</div>
+      <span id="alertCountBadge" class="badge badge-high" style="display:none">0 Active</span>
+    </div>
+  </header>
+
+  <div class="page-body">
+
+    <!-- SOS SECTION -->
+    <div style="
+      background:linear-gradient(135deg,rgba(255,59,92,0.08),rgba(155,93,229,0.08));
+      border:1px solid rgba(255,59,92,0.2);
+      border-radius:var(--radius);
+      padding:28px;
+      text-align:center;
+      margin-bottom:24px;
+      position:relative;
+      overflow:hidden;
+    ">
+      <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(255,59,92,0.05),transparent 70%)"></div>
+      <div style="position:relative;z-index:1">
+        <div style="font-size:0.75rem;font-weight:700;letter-spacing:0.15em;color:var(--red);text-transform:uppercase;margin-bottom:8px">Emergency Feature</div>
+        <h2 style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;margin-bottom:10px">One Tap. Instant Help.</h2>
+        <p style="color:var(--text-2);max-width:420px;margin:0 auto 20px;font-size:0.9rem">
+          Our SOS system detects your GPS location and instantly alerts nearby emergency responders and authorities.
+        </p>
+        <button class="sos-btn" id="sosBtn" onclick="triggerSOS()">
+          🆘 Send SOS Emergency Alert
+        </button>
+        <div id="sosStatus" style="margin-top:14px;font-size:0.8rem;color:var(--text-3)"></div>
+      </div>
+    </div>
+
+    <!-- ALERTS GRID -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Active Alerts & Cluster Notifications</span>
+        <button class="btn btn-ghost btn-sm" onclick="loadAlerts()">↻ Refresh</button>
+      </div>
+      <div class="card-body">
+
+        <!-- Legend -->
+        <div style="display:flex;gap:16px;margin-bottom:18px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.78rem"><span style="width:10px;height:10px;background:var(--red);border-radius:50%;display:inline-block"></span>SOS / High Severity</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.78rem"><span style="width:10px;height:10px;background:var(--yellow);border-radius:50%;display:inline-block"></span>Medium Cluster</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.78rem"><span style="width:10px;height:10px;background:var(--green);border-radius:50%;display:inline-block"></span>Low Priority</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.78rem;margin-left:auto;color:var(--text-3)">⚡ Auto-triggers when ≥5 complaints cluster within 5km</div>
+        </div>
+
+        <div id="alertsGrid">
+          <div style="text-align:center;padding:40px"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div class="card" style="margin-top:20px">
+      <div class="card-header"><span class="card-title">ℹ️ How Alert System Works</span></div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+          <div style="padding:16px;background:var(--bg2);border-radius:var(--radius-sm);border:1px solid var(--border)">
+            <div style="font-size:1.5rem;margin-bottom:8px">📍</div>
+            <div style="font-weight:600;margin-bottom:4px;font-size:0.875rem">Geolocation Tracking</div>
+            <div style="font-size:0.78rem;color:var(--text-3)">Every complaint records GPS coordinates of the reported issue.</div>
+          </div>
+          <div style="padding:16px;background:var(--bg2);border-radius:var(--radius-sm);border:1px solid var(--border)">
+            <div style="font-size:1.5rem;margin-bottom:8px">🔍</div>
+            <div style="font-weight:600;margin-bottom:4px;font-size:0.875rem">Cluster Detection</div>
+            <div style="font-size:0.78rem;color:var(--text-3)">When 5+ complaints exist within a 5km radius, a cluster alert is auto-generated.</div>
+          </div>
+          <div style="padding:16px;background:var(--bg2);border-radius:var(--radius-sm);border:1px solid var(--border)">
+            <div style="font-size:1.5rem;margin-bottom:8px">🆘</div>
+            <div style="font-weight:600;margin-bottom:4px;font-size:0.875rem">Emergency SOS</div>
+            <div style="font-size:0.78rem;color:var(--text-3)">Citizens can manually trigger SOS alerts with their live GPS location.</div>
+          </div>
+          <div style="padding:16px;background:var(--bg2);border-radius:var(--radius-sm);border:1px solid var(--border)">
+            <div style="font-size:1.5rem;margin-bottom:8px">📢</div>
+            <div style="font-weight:600;margin-bottom:4px;font-size:0.875rem">Authority Notification</div>
+            <div style="font-size:0.78rem;color:var(--text-3)">Alerts are instantly visible to authorities and flagged on the live map.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<div id="toast-container"></div>
+
+<script src="/frontend/js/api.js"></script>
+<script>
+if(!RN.requireAuth()) throw '';
+RN.populateSidebar();
+
+const SEVERITY_EMOJI = { sos:'🆘', high:'🔴', medium:'🟡', low:'🟢' };
+const SEVERITY_LABEL = { sos:'SOS Emergency', high:'High Severity', medium:'Medium Cluster', low:'Low Priority' };
+
+async function loadAlerts() {
+  try {
+    const items = await RN.alerts.list();
+    if (!items) return;
+    const grid = document.getElementById('alertsGrid');
+    const badge = document.getElementById('alertCountBadge');
+    badge.textContent = items.length + ' Active';
+    badge.style.display = items.length ? 'inline-flex' : 'none';
+
+    if (!items.length) {
+      grid.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">🟢</div>
+          <div class="empty-state-text" style="font-size:1rem;font-weight:600">All Clear — No Active Alerts</div>
+          <div style="font-size:0.8rem;color:var(--text-3);margin-top:8px">Your community is safe. Alerts will appear here when clusters are detected.</div>
+        </div>`;
+      return;
+    }
+
+    grid.innerHTML = `<div class="alert-cards-grid">${items.map(a=>`
+      <div class="alert-card ${a.severity}">
+        <div class="alert-severity-dot">${SEVERITY_EMOJI[a.severity]||'⚠️'}</div>
+        <div class="alert-body">
+          <div class="alert-title">${SEVERITY_LABEL[a.severity]||RN.capitalize(a.severity)}</div>
+          <div class="alert-location">📍 ${a.location||'Unknown location'}</div>
+          ${a.latitude ? `<div style="font-size:0.72rem;color:var(--text-3)">${a.latitude.toFixed(4)}, ${a.longitude.toFixed(4)}</div>` : ''}
+          <div class="alert-time">🕐 ${RN.timeAgo(a.created_at||new Date().toISOString())}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <span class="badge badge-${a.severity}">${RN.capitalize(a.severity)}</span>
+          ${a.latitude ? `<div style="margin-top:8px"><a href="/frontend/map.html" class="btn btn-ghost btn-sm">🗺️ Map</a></div>` : ''}
+        </div>
+      </div>`).join('')}</div>`;
+  } catch(e) { RN.toast('Failed to load alerts: '+e.message,'error'); }
+}
+
+async function triggerSOS() {
+  const btn = document.getElementById('sosBtn');
+  const status = document.getElementById('sosStatus');
+  btn.disabled = true;
+  btn.style.opacity = '0.7';
+  status.textContent = '📡 Getting your location...';
+
+  try {
+    await new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          status.textContent = `📍 Location captured: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
+          try {
+            await RN.alerts.sos({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+            status.textContent = '✅ SOS sent! Authorities have been notified.';
+            status.style.color = 'var(--green)';
+            RN.toast('🆘 Emergency SOS sent! Help is on the way.','error');
+            await loadAlerts();
+          } catch(e) { reject(e); }
+          resolve();
+        },
+        async () => {
+          // Fallback with Bengaluru coordinates
+          status.textContent = '⚠ GPS unavailable, sending with default location...';
+          await RN.alerts.sos({ latitude: 12.9716, longitude: 77.5946 });
+          status.textContent = '✅ SOS sent with default location!';
+          status.style.color = 'var(--green)';
+          RN.toast('🆘 SOS sent (GPS unavailable)','error');
+          await loadAlerts();
+          resolve();
+        }
+      );
+    });
+  } catch(e) {
+    status.textContent = '⚠ Failed to send SOS: '+e.message;
+    status.style.color = 'var(--red)';
+    RN.toast('SOS failed: '+e.message,'error');
+  } finally {
+    setTimeout(()=>{ btn.disabled=false; btn.style.opacity='1'; btn.textContent='🆘 Send SOS Emergency Alert'; }, 4000);
+  }
+}
+
+loadAlerts();
+// Auto-refresh every 30 seconds
+setInterval(loadAlerts, 30000);
+</script>
+</body>
+</html>

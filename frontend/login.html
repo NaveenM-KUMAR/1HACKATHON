@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — Raksha Nethra</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Space Grotesk',sans-serif;background:#060611;color:#e8eaf6;min-height:100vh;display:flex;overflow:hidden}
+canvas#bg{position:fixed;inset:0;z-index:0}
+/* ─ LEFT PANEL ─ */
+.left-panel{flex:1;display:flex;flex-direction:column;justify-content:center;padding:60px;position:relative;z-index:1}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:60px}
+.logo-orb{width:42px;height:42px;border-radius:50%;background:conic-gradient(from 180deg,#00e5ff,#9b5de5,#ff3b5c,#00e5ff);animation:spin 4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.brand-text{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800}
+.brand-text span{color:#00e5ff}
+.hero-heading{font-family:'Syne',sans-serif;font-size:3.2rem;font-weight:800;line-height:1.1;margin-bottom:20px}
+.hero-heading em{font-style:normal;background:linear-gradient(135deg,#00e5ff,#9b5de5);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-desc{color:rgba(232,234,246,0.6);font-size:1rem;line-height:1.7;max-width:420px;margin-bottom:40px}
+.feature-list{display:flex;flex-direction:column;gap:12px}
+.feat-item{display:flex;align-items:center;gap:10px;font-size:0.875rem;color:rgba(232,234,246,0.7)}
+.feat-dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#00e5ff,#9b5de5);flex-shrink:0}
+
+/* ─ RIGHT PANEL ─ */
+.right-panel{width:480px;background:rgba(13,13,28,0.95);border-left:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;justify-content:center;padding:50px 44px;position:relative;z-index:1;backdrop-filter:blur(20px)}
+.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:36px}
+.auth-logo .logo-orb{width:32px;height:32px}
+.auth-logo span{font-size:1rem;font-weight:700}
+.tab-row{display:flex;gap:4px;background:rgba(255,255,255,0.04);border-radius:10px;padding:4px;margin-bottom:28px}
+.tab-btn{flex:1;padding:8px;border:none;background:transparent;color:rgba(232,234,246,0.5);font-family:'Space Grotesk',sans-serif;font-size:0.84rem;font-weight:600;border-radius:8px;cursor:pointer;transition:all 0.2s}
+.tab-btn.active{background:#0d0d1c;color:#e8eaf6;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:0.75rem;font-weight:600;color:rgba(232,234,246,0.6);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em}
+.form-input,.form-select{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#e8eaf6;padding:11px 14px;font-size:0.875rem;font-family:'Space Grotesk',sans-serif;transition:border 0.2s,box-shadow 0.2s}
+.form-input:focus,.form-select:focus{outline:none;border-color:#00e5ff;box-shadow:0 0 0 3px rgba(0,229,255,0.12)}
+.form-input::placeholder{color:rgba(232,234,246,0.25)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-select option{background:#0d0d1c}
+.pw-wrap{position:relative}
+.pw-wrap .form-input{padding-right:42px}
+.pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(232,234,246,0.4);cursor:pointer;font-size:1rem;padding:4px}
+.pw-toggle:hover{color:rgba(232,234,246,0.8)}
+.btn-submit{width:100%;padding:13px;background:linear-gradient(135deg,#00e5ff,#0080ff);color:#060611;font-family:'Space Grotesk',sans-serif;font-size:0.95rem;font-weight:700;border:none;border-radius:10px;cursor:pointer;transition:all 0.2s;margin-top:8px;position:relative;overflow:hidden}
+.btn-submit:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(0,229,255,0.4)}
+.btn-submit:active{transform:translateY(0)}
+.btn-submit:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+.btn-submit .shimmer{position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);transform:translateX(-100%);animation:shimmer 2s infinite}
+@keyframes shimmer{to{transform:translateX(100%)}}
+.alert-box{padding:10px 14px;border-radius:8px;font-size:0.82rem;margin-bottom:14px;display:none}
+.alert-box.show{display:block}
+.alert-box.success{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);color:#00ff88}
+.alert-box.error{background:rgba(255,59,92,0.1);border:1px solid rgba(255,59,92,0.3);color:#ff3b5c}
+.switch-text{text-align:center;font-size:0.8rem;color:rgba(232,234,246,0.4);margin-top:18px}
+.switch-text span{color:#00e5ff;cursor:pointer;font-weight:600}
+.switch-text span:hover{text-decoration:underline}
+.divider{display:flex;align-items:center;gap:12px;color:rgba(232,234,246,0.2);font-size:0.75rem;margin:18px 0}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.06)}
+@media(max-width:900px){.left-panel{display:none}.right-panel{width:100%;border-left:none}}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+
+<div class="left-panel">
+  <div class="brand">
+    <div class="logo-orb"></div>
+    <div class="brand-text">Raksha <span>Nethra</span></div>
+  </div>
+  <h1 class="hero-heading">
+    Protect Your<br>
+    <em>Community</em><br>
+    With Intelligence.
+  </h1>
+  <p class="hero-desc">
+    AI-powered civic platform that turns citizen reports into real action — in real time.
+  </p>
+  <div class="feature-list">
+    <div class="feat-item"><div class="feat-dot"></div>AI Complaint Classification & Routing</div>
+    <div class="feat-item"><div class="feat-dot"></div>Live Civic Map with Risk Heatmaps</div>
+    <div class="feat-item"><div class="feat-dot"></div>Emergency SOS with Location Detection</div>
+    <div class="feat-item"><div class="feat-dot"></div>Real-time Analytics for Authorities</div>
+    <div class="feat-item"><div class="feat-dot"></div>One-click TF.js AI Image Detection</div>
+  </div>
+</div>
+
+<div class="right-panel">
+  <div class="auth-logo">
+    <div class="logo-orb"></div>
+    <span>Raksha Nethra</span>
+  </div>
+
+  <div class="tab-row">
+    <button class="tab-btn active" id="tabLogin" onclick="showTab('login')">Sign In</button>
+    <button class="tab-btn" id="tabRegister" onclick="showTab('register')">Create Account</button>
+  </div>
+
+  <!-- LOGIN PANEL -->
+  <div id="panelLogin">
+    <div class="alert-box" id="loginAlert"></div>
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input type="email" class="form-input" id="lEmail" placeholder="you@example.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="pw-wrap">
+        <input type="password" class="form-input" id="lPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+        <button class="pw-toggle" onclick="togglePw('lPass',this)">👁</button>
+      </div>
+    </div>
+    <button class="btn-submit" id="btnLogin" onclick="doLogin()">
+      <span id="btnLoginText">Sign In to Platform</span>
+      <div class="shimmer"></div>
+    </button>
+    <p class="switch-text">No account? <span onclick="showTab('register')">Create one →</span></p>
+  </div>
+
+  <!-- REGISTER PANEL -->
+  <div id="panelRegister" style="display:none">
+    <div class="alert-box" id="regAlert"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" class="form-input" id="rName" placeholder="Arjun Sharma">
+      </div>
+      <div class="form-group">
+        <label class="form-label">City / Village</label>
+        <input type="text" class="form-input" id="rCity" placeholder="Bengaluru">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input type="email" class="form-input" id="rEmail" placeholder="you@example.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Role</label>
+      <select class="form-select" id="rRole">
+        <option value="citizen">Citizen</option>
+        <option value="authority">Municipal Authority</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="pw-wrap">
+        <input type="password" class="form-input" id="rPass" placeholder="Create a strong password" onkeydown="if(event.key==='Enter')doRegister()">
+        <button class="pw-toggle" onclick="togglePw('rPass',this)">👁</button>
+      </div>
+    </div>
+    <button class="btn-submit" id="btnReg" onclick="doRegister()">
+      <span id="btnRegText">Create My Account</span>
+      <div class="shimmer"></div>
+    </button>
+    <p class="switch-text">Already a member? <span onclick="showTab('login')">Sign in →</span></p>
+  </div>
+</div>
+
+<script>
+// Animated BG Canvas
+(function(){
+  const c=document.getElementById('bg'),ctx=c.getContext('2d');
+  let W,H,pts=[];
+  function init(){W=c.width=innerWidth;H=c.height=innerHeight;pts=Array.from({length:120},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.2+0.3,s:Math.random()*0.2+0.05,ph:Math.random()*Math.PI*2}));}
+  function draw(ts){
+    ctx.clearRect(0,0,W,H);
+    [{x:W*.15,y:H*.3,r:400,c:'0,229,255'},{x:W*.85,y:H*.5,r:340,c:'155,93,229'}].forEach(n=>{
+      const g=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r);
+      g.addColorStop(0,`rgba(${n.c},0.06)`);g.addColorStop(1,`rgba(${n.c},0)`);
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fill();
+    });
+    pts.forEach(p=>{const a=0.3+0.5*Math.sin(p.ph+ts*.001*p.s);ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(210,225,255,${a})`;ctx.fill();});
+    requestAnimationFrame(draw);
+  }
+  init();requestAnimationFrame(draw);window.addEventListener('resize',init);
+})();
+
+// Check if already logged in
+if(localStorage.getItem('rn_token')) window.location.href='/frontend/dashboard.html';
+
+function showTab(tab) {
+  const isLogin = tab==='login';
+  document.getElementById('tabLogin').classList.toggle('active',isLogin);
+  document.getElementById('tabRegister').classList.toggle('active',!isLogin);
+  document.getElementById('panelLogin').style.display = isLogin?'block':'none';
+  document.getElementById('panelRegister').style.display = isLogin?'none':'block';
+  clearAlerts();
+}
+function clearAlerts(){['loginAlert','regAlert'].forEach(id=>{const el=document.getElementById(id);if(el){el.className='alert-box';el.textContent='';}})}
+function showAlert(id,msg,type){const el=document.getElementById(id);el.textContent=msg;el.className=`alert-box show ${type}`;}
+function togglePw(id,btn){const inp=document.getElementById(id);inp.type=inp.type==='password'?'text':'password';btn.textContent=inp.type==='password'?'👁':'🙈';}
+
+async function doLogin() {
+  const email=document.getElementById('lEmail').value.trim();
+  const pass=document.getElementById('lPass').value;
+  if(!email||!pass){showAlert('loginAlert','Please fill in all fields.','error');return;}
+  const btn=document.getElementById('btnLogin');
+  const btnTxt=document.getElementById('btnLoginText');
+  btn.disabled=true;btnTxt.textContent='Signing In...';
+  try {
+    const res = await fetch('http://127.0.0.1:8000/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})});
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.detail||'Login failed');
+    localStorage.setItem('rn_token', data.access_token);
+    localStorage.setItem('rn_user', JSON.stringify(data.user));
+    showAlert('loginAlert','✓ Signed in successfully! Redirecting...','success');
+    setTimeout(()=>window.location.href='/frontend/dashboard.html',900);
+  } catch(e) {
+    showAlert('loginAlert','⚠ '+e.message,'error');
+    btn.disabled=false;btnTxt.textContent='Sign In to Platform';
+  }
+}
+
+async function doRegister() {
+  const name=document.getElementById('rName').value.trim();
+  const city=document.getElementById('rCity').value.trim();
+  const email=document.getElementById('rEmail').value.trim();
+  const role=document.getElementById('rRole').value;
+  const pass=document.getElementById('rPass').value;
+  if(!name||!email||!pass){showAlert('regAlert','Please fill all required fields.','error');return;}
+  const btn=document.getElementById('btnReg');
+  const btnTxt=document.getElementById('btnRegText');
+  btn.disabled=true;btnTxt.textContent='Creating Account...';
+  try {
+    const res = await fetch('http://127.0.0.1:8000/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password:pass,role,city})});
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.detail||'Registration failed');
+    showAlert('regAlert','✓ Account created! Please sign in.','success');
+    setTimeout(()=>{showTab('login');document.getElementById('lEmail').value=email;},1500);
+  } catch(e) {
+    showAlert('regAlert','⚠ '+e.message,'error');
+  } finally {
+    btn.disabled=false;btnTxt.textContent='Create My Account';
+  }
+}
+</script>
+</body>
+</html>

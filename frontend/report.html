@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report Issue — Raksha Nethra</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/frontend/css/main.css">
+<style>
+.report-layout{display:grid;grid-template-columns:1fr 380px;gap:20px}
+.canvas-detection-wrap{position:relative;border-radius:var(--radius);overflow:hidden;background:var(--bg2);max-height:280px;display:flex;align-items:center;justify-content:center}
+.canvas-detection-wrap canvas{max-width:100%;max-height:280px;object-fit:contain}
+.detection-box{position:absolute;border:2px solid;border-radius:4px;pointer-events:none}
+@media(max-width:900px){.report-layout{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-orb"></div>
+    <div class="logo-text">Raksha <span>Nethra</span></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a href="/frontend/dashboard.html" class="nav-link"><span class="nav-icon">📊</span>Dashboard</a>
+    <a href="/frontend/report.html"    class="nav-link active"><span class="nav-icon">📝</span>Report Issue</a>
+    <a href="/frontend/map.html"       class="nav-link"><span class="nav-icon">🗺️</span>Live Map</a>
+    <div class="nav-section-label" style="margin-top:10px">Analytics</div>
+    <a href="/frontend/analytics.html" class="nav-link"><span class="nav-icon">📈</span>Analytics</a>
+    <a href="/frontend/alerts.html"    class="nav-link"><span class="nav-icon">🚨</span>Community Alerts</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar" id="sidebar-user-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-user-name">Loading...</div>
+        <div class="user-role" id="sidebar-user-role">—</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="RN.clearAuth();window.location.href='/frontend/login.html'">⟲ Sign Out</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-content">
+  <header class="top-header">
+    <div>
+      <div class="page-title">Report a Civic Issue</div>
+      <div class="page-sub">Upload image · AI detects the problem · Submit to database</div>
+    </div>
+    <div class="header-right">
+      <div class="ai-badge" id="aiStatus">🤖 AI Ready</div>
+    </div>
+  </header>
+
+  <div class="page-body">
+    <div class="report-layout">
+
+      <!-- LEFT: Image + AI Detection -->
+      <div>
+        <!-- UPLOAD AREA -->
+        <div class="card" style="margin-bottom:18px">
+          <div class="card-header">
+            <span class="card-title">📷 Image Upload</span>
+            <button class="btn btn-ghost btn-sm" onclick="runAIDetection()" id="btnDetect" disabled>🤖 Run AI Detection</button>
+          </div>
+          <div class="card-body">
+            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+              <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFile(this.files[0])">
+              <div class="upload-icon">📷</div>
+              <div class="upload-text">Drag & drop your photo or <strong>click to browse</strong></div>
+              <div class="upload-sub">JPG, PNG, WebP · Max 10MB</div>
+            </div>
+            <!-- Image Preview with Canvas overlay -->
+            <div class="canvas-detection-wrap" id="previewWrap" style="display:none;margin-top:14px">
+              <img id="previewImg" src="" alt="Preview">
+              <canvas id="detCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI DETECTION PANEL -->
+        <div class="ai-panel" id="aiPanel" style="display:none">
+          <div class="ai-panel-header">
+            <span>🤖 AI Detection Results</span>
+            <span class="ai-badge">TF.js COCO-SSD</span>
+          </div>
+          <div id="aiResults"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Form -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">📋 Complaint Details</span></div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label">Issue Type *</label>
+            <select class="form-select" id="fIssueType">
+              <option value="">Select issue type</option>
+              <option value="pothole">🛣️ Pothole</option>
+              <option value="garbage">🗑️ Garbage Accumulation</option>
+              <option value="streetlight">💡 Broken Streetlight</option>
+              <option value="water_leak">💧 Water Leak</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea class="form-textarea" id="fDesc" placeholder="Describe the issue in detail..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Priority</label>
+            <select class="form-select" id="fPriority">
+              <option value="low">🟢 Low</option>
+              <option value="medium" selected>🟡 Medium</option>
+              <option value="high">🔴 High</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Location</label>
+            <div class="form-row" style="margin-bottom:8px">
+              <div>
+                <input type="number" class="form-input" id="fLat" placeholder="Latitude" step="any">
+              </div>
+              <div>
+                <input type="number" class="form-input" id="fLon" placeholder="Longitude" step="any">
+              </div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="getLocation()" style="width:100%">📍 Auto-detect Location</button>
+            <div id="locStatus" style="font-size:0.75rem;color:var(--text-3);margin-top:6px;text-align:center"></div>
+          </div>
+
+          <!-- AI Confidence Badge (shown after detection) -->
+          <div id="confSection" style="display:none;margin-bottom:16px">
+            <label class="form-label">AI Confidence</label>
+            <div class="conf-bar"><div class="conf-fill" id="confFill" style="width:0%"></div></div>
+            <div style="font-size:0.75rem;color:var(--text-3);margin-top:4px"><span id="confText">—</span></div>
+          </div>
+
+          <input type="hidden" id="fConfidence" value="">
+
+          <button class="btn btn-primary" style="width:100%;margin-top:8px" id="btnSubmit" onclick="submitComplaint()">
+            📤 Submit Complaint
+          </button>
+          <button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="resetForm()">✕ Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<div id="toast-container"></div>
+
+<!-- TF.js + COCO-SSD -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.11.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+<script src="/frontend/js/api.js"></script>
+<script>
+if(!RN.requireAuth()) throw '';
+RN.populateSidebar();
+
+let selectedFile = null;
+let aiModel = null;
+let aiConfidence = 0;
+
+// Load TF.js model in background
+const aiStatusEl = document.getElementById('aiStatus');
+cocoSsd.load().then(m => {
+  aiModel = m;
+  aiStatusEl.textContent = '🤖 AI Model Loaded';
+  aiStatusEl.style.background = 'var(--green-dim)';
+  aiStatusEl.style.borderColor = 'var(--green)';
+  aiStatusEl.style.color = 'var(--green)';
+}).catch(()=>{
+  aiStatusEl.textContent = '⚠ AI Unavailable';
+});
+
+// Drag & drop
+const uploadArea = document.getElementById('uploadArea');
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
+uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('drag-over'); if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+
+function handleFile(file) {
+  if(!file || !file.type.startsWith('image/')) { RN.toast('Please select an image file','error'); return; }
+  selectedFile = file;
+  const url = URL.createObjectURL(file);
+  const img = document.getElementById('previewImg');
+  img.src = url;
+  document.getElementById('previewWrap').style.display = 'flex';
+  document.getElementById('uploadArea').style.display = 'none';
+  document.getElementById('btnDetect').disabled = !aiModel;
+  // Clear previous detection
+  const canvas = document.getElementById('detCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  document.getElementById('aiPanel').style.display = 'none';
+}
+
+// COCO-SSD issue mapping
+const CIVIC_MAP = {
+  bottle:'garbage', cup:'garbage', banana:'garbage', apple:'garbage', sandwich:'garbage',
+  pizza:'garbage', cake:'garbage', bowl:'garbage', 'wine glass':'garbage',
+  'traffic light':'streetlight', 'fire hydrant':'water_leak', 'stop sign':'streetlight',
+  car:'pothole', truck:'pothole', bus:'pothole', motorcycle:'pothole',
+  person:'pothole', bicycle:'pothole',
+};
+function mapToCivic(predictions) {
+  for (const p of predictions) {
+    const issue = CIVIC_MAP[p.class.toLowerCase()];
+    if (issue) return { issue, confidence: p.score, raw: p.class };
+  }
+  return { issue: 'pothole', confidence: predictions[0]?.score || 0.5, raw: predictions[0]?.class || 'Unknown' };
+}
+
+async function runAIDetection() {
+  if(!aiModel){RN.toast('AI model not loaded yet','error');return;}
+  if(!selectedFile){RN.toast('Upload an image first','error');return;}
+  const btnD = document.getElementById('btnDetect');
+  btnD.disabled = true; btnD.textContent = '🔄 Analyzing...';
+  aiStatusEl.textContent = '🔄 Running Detection...';
+  try {
+    const img = document.getElementById('previewImg');
+    const predictions = await aiModel.detect(img);
+
+    // Draw boxes on canvas
+    const canvas = document.getElementById('detCanvas');
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    predictions.forEach(p => {
+      const [x,y,w,h] = p.bbox;
+      ctx.strokeStyle = '#00e5ff';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(x,y,w,h);
+      ctx.fillStyle = 'rgba(0,229,255,0.85)';
+      ctx.fillRect(x, y-22, ctx.measureText(p.class).width+16, 22);
+      ctx.fillStyle = '#000';
+      ctx.font = 'bold 14px Space Grotesk, sans-serif';
+      ctx.fillText(p.class, x+8, y-6);
+    });
+
+    // Map to civic issue
+    if (predictions.length) {
+      const mapped = mapToCivic(predictions);
+      aiConfidence = mapped.confidence;
+      document.getElementById('fIssueType').value = mapped.issue;
+      document.getElementById('fConfidence').value = mapped.confidence;
+
+      // Conf bar
+      const pct = Math.round(mapped.confidence * 100);
+      document.getElementById('confFill').style.width = pct+'%';
+      document.getElementById('confText').textContent = `${pct}% confident — detected: ${mapped.raw}`;
+      document.getElementById('confSection').style.display = 'block';
+
+      // Priority from confidence
+      document.getElementById('fPriority').value = mapped.confidence >= 0.85 ? 'high' : mapped.confidence >= 0.6 ? 'medium' : 'low';
+
+      // Results panel
+      document.getElementById('aiPanel').style.display = 'block';
+      document.getElementById('aiResults').innerHTML = `
+        <div class="detection-result">
+          <div class="detection-icon">${RN.issueEmoji(mapped.issue)}</div>
+          <div class="detection-info">
+            <div class="detection-label">${RN.capitalize(mapped.issue)} Detected</div>
+            <div class="detection-conf">From detection: "${mapped.raw}" · ${Math.round(mapped.confidence*100)}% confidence</div>
+            <div class="conf-bar" style="margin-top:8px"><div class="conf-fill" style="width:${Math.round(mapped.confidence*100)}%"></div></div>
+          </div>
+        </div>
+        <div style="font-size:0.75rem;color:var(--text-3);margin-top:10px">${predictions.length} object(s) detected · Issue type pre-filled in form</div>`;
+      RN.toast(`AI detected: ${mapped.raw} → ${RN.capitalize(mapped.issue)}`, 'success');
+    } else {
+      document.getElementById('aiPanel').style.display = 'block';
+      document.getElementById('aiResults').innerHTML = `<div style="color:var(--text-3);font-size:0.84rem">No specific objects detected. Please select issue type manually.</div>`;
+    }
+    aiStatusEl.textContent = '✓ Detection Complete';
+  } catch(e) {
+    RN.toast('AI detection error: '+e.message,'error');
+    aiStatusEl.textContent = '⚠ Detection Failed';
+  } finally {
+    btnD.disabled = false; btnD.textContent = '🤖 Run AI Detection';
+  }
+}
+
+function getLocation() {
+  const locStatus = document.getElementById('locStatus');
+  locStatus.textContent = '📡 Detecting location...';
+  navigator.geolocation.getCurrentPosition(pos => {
+    document.getElementById('fLat').value = pos.coords.latitude.toFixed(6);
+    document.getElementById('fLon').value  = pos.coords.longitude.toFixed(6);
+    locStatus.textContent = `✓ Location captured: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
+    locStatus.style.color = 'var(--green)';
+  }, () => {
+    locStatus.textContent = '⚠ Could not get location. Please enter manually.';
+    locStatus.style.color = 'var(--red)';
+  });
+}
+
+async function submitComplaint() {
+  const issueType = document.getElementById('fIssueType').value;
+  if (!issueType) { RN.toast('Please select an issue type','error'); return; }
+  const btn = document.getElementById('btnSubmit');
+  btn.disabled = true; btn.textContent = '📤 Submitting...';
+  try {
+    const form = new FormData();
+    form.append('issue_type', issueType);
+    form.append('description', document.getElementById('fDesc').value);
+    form.append('priority',    document.getElementById('fPriority').value);
+    const lat = document.getElementById('fLat').value;
+    const lon = document.getElementById('fLon').value;
+    if (lat) form.append('latitude',  lat);
+    if (lon) form.append('longitude', lon);
+    const conf = document.getElementById('fConfidence').value;
+    if (conf) form.append('ai_confidence', conf);
+    if (selectedFile) form.append('image', selectedFile);
+
+    const result = await RN.complaints.create(form);
+    if (result) {
+      RN.toast('✓ Complaint submitted successfully! ID: #'+result.id,'success');
+      setTimeout(()=>window.location.href='/frontend/dashboard.html', 1500);
+    }
+  } catch(e) {
+    RN.toast('Submission failed: '+e.message,'error');
+    btn.disabled = false; btn.textContent = '📤 Submit Complaint';
+  }
+}
+
+function resetForm() {
+  selectedFile = null;
+  document.getElementById('previewWrap').style.display = 'none';
+  document.getElementById('uploadArea').style.display = 'block';
+  document.getElementById('aiPanel').style.display = 'none';
+  document.getElementById('confSection').style.display = 'none';
+  document.getElementById('fIssueType').value = '';
+  document.getElementById('fDesc').value = '';
+  document.getElementById('fLat').value = '';
+  document.getElementById('fLon').value = '';
+  document.getElementById('fConfidence').value = '';
+  document.getElementById('btnDetect').disabled = true;
+  document.getElementById('locStatus').textContent = '';
+  const ctx = document.getElementById('detCanvas').getContext('2d');
+  ctx.clearRect(0,0,9999,9999);
+}
+</script>
+</body>
+</html>
