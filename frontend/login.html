@@ -3,238 +3,749 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sign In — Raksha Nethra</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Space Grotesk',sans-serif;background:#060611;color:#e8eaf6;min-height:100vh;display:flex;overflow:hidden}
-canvas#bg{position:fixed;inset:0;z-index:0}
-/* ─ LEFT PANEL ─ */
-.left-panel{flex:1;display:flex;flex-direction:column;justify-content:center;padding:60px;position:relative;z-index:1}
-.brand{display:flex;align-items:center;gap:12px;margin-bottom:60px}
-.logo-orb{width:42px;height:42px;border-radius:50%;background:conic-gradient(from 180deg,#00e5ff,#9b5de5,#ff3b5c,#00e5ff);animation:spin 4s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.brand-text{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800}
-.brand-text span{color:#00e5ff}
-.hero-heading{font-family:'Syne',sans-serif;font-size:3.2rem;font-weight:800;line-height:1.1;margin-bottom:20px}
-.hero-heading em{font-style:normal;background:linear-gradient(135deg,#00e5ff,#9b5de5);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero-desc{color:rgba(232,234,246,0.6);font-size:1rem;line-height:1.7;max-width:420px;margin-bottom:40px}
-.feature-list{display:flex;flex-direction:column;gap:12px}
-.feat-item{display:flex;align-items:center;gap:10px;font-size:0.875rem;color:rgba(232,234,246,0.7)}
-.feat-dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#00e5ff,#9b5de5);flex-shrink:0}
-
-/* ─ RIGHT PANEL ─ */
-.right-panel{width:480px;background:rgba(13,13,28,0.95);border-left:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;justify-content:center;padding:50px 44px;position:relative;z-index:1;backdrop-filter:blur(20px)}
-.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:36px}
-.auth-logo .logo-orb{width:32px;height:32px}
-.auth-logo span{font-size:1rem;font-weight:700}
-.tab-row{display:flex;gap:4px;background:rgba(255,255,255,0.04);border-radius:10px;padding:4px;margin-bottom:28px}
-.tab-btn{flex:1;padding:8px;border:none;background:transparent;color:rgba(232,234,246,0.5);font-family:'Space Grotesk',sans-serif;font-size:0.84rem;font-weight:600;border-radius:8px;cursor:pointer;transition:all 0.2s}
-.tab-btn.active{background:#0d0d1c;color:#e8eaf6;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
-.form-group{margin-bottom:16px}
-.form-label{display:block;font-size:0.75rem;font-weight:600;color:rgba(232,234,246,0.6);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em}
-.form-input,.form-select{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#e8eaf6;padding:11px 14px;font-size:0.875rem;font-family:'Space Grotesk',sans-serif;transition:border 0.2s,box-shadow 0.2s}
-.form-input:focus,.form-select:focus{outline:none;border-color:#00e5ff;box-shadow:0 0 0 3px rgba(0,229,255,0.12)}
-.form-input::placeholder{color:rgba(232,234,246,0.25)}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.form-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.form-select option{background:#0d0d1c}
-.pw-wrap{position:relative}
-.pw-wrap .form-input{padding-right:42px}
-.pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(232,234,246,0.4);cursor:pointer;font-size:1rem;padding:4px}
-.pw-toggle:hover{color:rgba(232,234,246,0.8)}
-.btn-submit{width:100%;padding:13px;background:linear-gradient(135deg,#00e5ff,#0080ff);color:#060611;font-family:'Space Grotesk',sans-serif;font-size:0.95rem;font-weight:700;border:none;border-radius:10px;cursor:pointer;transition:all 0.2s;margin-top:8px;position:relative;overflow:hidden}
-.btn-submit:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(0,229,255,0.4)}
-.btn-submit:active{transform:translateY(0)}
-.btn-submit:disabled{opacity:0.6;cursor:not-allowed;transform:none}
-.btn-submit .shimmer{position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);transform:translateX(-100%);animation:shimmer 2s infinite}
-@keyframes shimmer{to{transform:translateX(100%)}}
-.alert-box{padding:10px 14px;border-radius:8px;font-size:0.82rem;margin-bottom:14px;display:none}
-.alert-box.show{display:block}
-.alert-box.success{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);color:#00ff88}
-.alert-box.error{background:rgba(255,59,92,0.1);border:1px solid rgba(255,59,92,0.3);color:#ff3b5c}
-.switch-text{text-align:center;font-size:0.8rem;color:rgba(232,234,246,0.4);margin-top:18px}
-.switch-text span{color:#00e5ff;cursor:pointer;font-weight:600}
-.switch-text span:hover{text-decoration:underline}
-.divider{display:flex;align-items:center;gap:12px;color:rgba(232,234,246,0.2);font-size:0.75rem;margin:18px 0}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.06)}
-@media(max-width:900px){.left-panel{display:none}.right-panel{width:100%;border-left:none}}
-</style>
+<title>Raksha Nethra — AI Civic Intelligence</title>
+<link rel="stylesheet" href="/frontend/css/landing.css">
+<link href="https://fonts.googleapis.com/css2?family=Clash+Grotesk:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-<canvas id="bg"></canvas>
 
-<div class="left-panel">
-  <div class="brand">
-    <div class="logo-orb"></div>
-    <div class="brand-text">Raksha <span>Nethra</span></div>
+<!-- CURSOR -->
+<div id="cursor"></div>
+<div id="cursor-trail"></div>
+
+<!-- CANVAS -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <div class="logo-orb"></div>
+      <span>Raksha Nethra</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how">Workflow</a></li>
+      <li><a href="#community">Community</a></li>
+      <li><a href="#roadmap">Roadmap</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="btn-nav-ghost" onclick="openModal('login')">Sign In</button>
+      <button class="btn-nav-cta" onclick="openModal('register')">Get Started <span>→</span></button>
+    </div>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
   </div>
-  <h1 class="hero-heading">
-    Protect Your<br>
-    <em>Community</em><br>
-    With Intelligence.
-  </h1>
-  <p class="hero-desc">
-    AI-powered civic platform that turns citizen reports into real action — in real time.
-  </p>
-  <div class="feature-list">
-    <div class="feat-item"><div class="feat-dot"></div>AI Complaint Classification & Routing</div>
-    <div class="feat-item"><div class="feat-dot"></div>Live Civic Map with Risk Heatmaps</div>
-    <div class="feat-item"><div class="feat-dot"></div>Emergency SOS with Location Detection</div>
-    <div class="feat-item"><div class="feat-dot"></div>Real-time Analytics for Authorities</div>
-    <div class="feat-item"><div class="feat-dot"></div>One-click TF.js AI Image Detection</div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#features" onclick="toggleMenu()">Features</a>
+  <a href="#how" onclick="toggleMenu()">Workflow</a>
+  <a href="#community" onclick="toggleMenu()">Community</a>
+  <a href="#roadmap" onclick="toggleMenu()">Roadmap</a>
+  <button class="btn-nav-cta" onclick="openModal('register');toggleMenu()">Get Started →</button>
+</div>
+
+<!-- ══ HERO ══ -->
+<section class="hero" id="home">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-glow g1"></div>
+  <div class="hero-glow g2"></div>
+  <div class="hero-glow g3"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge" data-aos>
+      <span class="badge-pulse"></span>
+      AI-Powered Civic Safety Platform
+    </div>
+
+    <h1 class="hero-title" data-aos data-aos-delay="100">
+      <span class="title-line">Protect Your</span>
+      <span class="title-line gradient-word">Community</span>
+      <span class="title-line">With Intelligence.</span>
+    </h1>
+
+    <p class="hero-desc" data-aos data-aos-delay="200">
+      Report civic issues. Visualize risk zones. Connect citizens with authorities.<br>
+      All powered by AI — in <em>real time</em>.
+    </p>
+
+    <div class="hero-btns" data-aos data-aos-delay="300">
+      <button class="btn-primary" onclick="openModal('register')">
+        <span>Join the Platform</span>
+        <div class="btn-shimmer"></div>
+      </button>
+      <button class="btn-secondary" onclick="scroll2('features')">
+        Explore Features <span class="arrow-icon">↓</span>
+      </button>
+    </div>
+
+    <div class="hero-stats" data-aos data-aos-delay="400">
+      <div class="stat">
+        <span class="stat-num" data-count="8">0</span><span class="stat-plus">+</span>
+        <span class="stat-label">AI Features</span>
+      </div>
+      <div class="stat-div"></div>
+      <div class="stat">
+        <span class="stat-num" data-count="5">0</span>
+        <span class="stat-label">Languages</span>
+      </div>
+      <div class="stat-div"></div>
+      <div class="stat">
+        <span class="stat-num stat-text">24/7</span>
+        <span class="stat-label">Monitoring</span>
+      </div>
+      <div class="stat-div"></div>
+      <div class="stat">
+        <span class="stat-num stat-text">SOS</span>
+        <span class="stat-label">Emergency</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HERO VISUAL: 3D Dashboard Card -->
+  <div class="hero-visual" data-aos data-aos-delay="150">
+    <div class="dash-wrapper" id="dashWrapper">
+      <div class="dash-card-3d" id="dash3d">
+        <div class="dc-header">
+          <div class="dc-dots">
+            <span style="background:#ff5f56"></span>
+            <span style="background:#ffbd2e"></span>
+            <span style="background:#27c93f"></span>
+          </div>
+          <span class="dc-title">CIVIC INTELLIGENCE MAP</span>
+          <div class="dc-live"><div class="live-blink"></div>LIVE</div>
+        </div>
+        <div class="dc-body">
+          <div class="dc-map">
+            <div class="map-dots"></div>
+            <div class="h-zone hz1"></div>
+            <div class="h-zone hz2"></div>
+            <div class="h-zone hz3"></div>
+            <div class="m-marker mm1" title="Pothole Reported">🛣️
+              <div class="m-ripple"></div></div>
+            <div class="m-marker mm2" title="Garbage Dump">🗑️
+              <div class="m-ripple"></div></div>
+            <div class="m-marker mm3" title="Broken Streetlight">💡
+              <div class="m-ripple"></div></div>
+            <div class="map-label ml1">⚠ High Risk</div>
+            <div class="map-label ml2">● Medium</div>
+          </div>
+          <div class="dc-sidebar">
+            <div class="sidebar-title">ACTIVE ALERTS</div>
+            <div class="s-card s-red">
+              <div class="s-dot" style="background:#ff3b5c"></div>
+              <div>
+                <div class="s-name">MG Road Cluster</div>
+                <div class="s-sub">3 complaints · High Priority</div>
+              </div>
+            </div>
+            <div class="s-card s-yellow">
+              <div class="s-dot" style="background:#ffa500"></div>
+              <div>
+                <div class="s-name">Pothole Detected</div>
+                <div class="s-sub">Road Dept. Assigned</div>
+              </div>
+            </div>
+            <div class="s-card s-blue">
+              <div class="s-dot" style="background:#00e5ff"></div>
+              <div>
+                <div class="s-name">Garbage Report</div>
+                <div class="s-sub">Municipal Corp. Notified</div>
+              </div>
+            </div>
+            <div class="stat-mini">
+              <div class="sm-row"><span>Active Issues</span><span class="sm-val">47</span></div>
+              <div class="sm-row"><span>Resolved Today</span><span class="sm-val green">12</span></div>
+              <div class="sm-row"><span>Danger Zones</span><span class="sm-val red">3</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TICKER ══ -->
+<div class="ticker-strip">
+  <div class="ticker-track">
+    <span>AI Classification</span><span>Live Maps</span><span>Risk Heatmaps</span>
+    <span>Emergency SOS</span><span>Analytics</span><span>Voice Reporting</span>
+    <span>Multilingual</span><span>Community Alerts</span>
+    <span>AI Classification</span><span>Live Maps</span><span>Risk Heatmaps</span>
+    <span>Emergency SOS</span><span>Analytics</span><span>Voice Reporting</span>
+    <span>Multilingual</span><span>Community Alerts</span>
   </div>
 </div>
 
-<div class="right-panel">
-  <div class="auth-logo">
-    <div class="logo-orb"></div>
-    <span>Raksha Nethra</span>
+<!-- ══ FEATURES ══ -->
+<section class="features-section" id="features">
+  <div class="container">
+    <div class="section-eyebrow" data-aos>✦ KEY FEATURES</div>
+    <h2 class="section-title" data-aos data-aos-delay="100">
+      Everything to protect<br><span class="gradient-word">your city.</span>
+    </h2>
+    <div class="features-grid">
+      <div class="feat-card fc-wide" data-aos>
+        <div class="fc-glow fc-glow-cyan"></div>
+        <div class="fc-num">01</div>
+        <div class="fc-icon-box fi-cyan">🤖</div>
+        <h3>AI Complaint Classification</h3>
+        <p>Describe a problem in plain language. Our AI instantly classifies the issue type, priority, and routes it to the correct authority.</p>
+        <div class="ai-chat">
+          <div class="chat-msg user-msg">"Large pothole near the school gate"</div>
+          <div class="chat-msg ai-msg">
+            <strong>Type:</strong> Pothole &nbsp;·&nbsp; <strong>Dept:</strong> Road Maintenance
+            <br><span class="priority-tag">🔴 HIGH PRIORITY</span>
+          </div>
+        </div>
+      </div>
+      <div class="feat-card" data-aos data-aos-delay="100">
+        <div class="fc-glow fc-glow-purple"></div>
+        <div class="fc-num">02</div>
+        <div class="fc-icon-box fi-purple">🗺️</div>
+        <h3>Interactive Civic Map</h3>
+        <p>Live map markers for potholes, garbage dumps, and broken lights. Authorities see everything at a glance.</p>
+      </div>
+      <div class="feat-card" data-aos data-aos-delay="150">
+        <div class="fc-glow fc-glow-red"></div>
+        <div class="fc-num">03</div>
+        <div class="fc-icon-box fi-red">🔥</div>
+        <h3>Smart Risk Heatmap</h3>
+        <p>Complaint density generates color-coded risk zones — Red, Yellow, Green — for rapid preventive action.</p>
+      </div>
+      <div class="feat-card" data-aos data-aos-delay="200">
+        <div class="fc-glow fc-glow-red"></div>
+        <div class="fc-num">04</div>
+        <div class="fc-icon-box fi-red">🚨</div>
+        <h3>Emergency SOS</h3>
+        <p>One-tap SOS with automatic location detection. Emergency responders are instantly notified.</p>
+      </div>
+      <div class="feat-card" data-aos data-aos-delay="100">
+        <div class="fc-glow fc-glow-cyan"></div>
+        <div class="fc-num">05</div>
+        <div class="fc-icon-box fi-cyan">📊</div>
+        <h3>Analytics Dashboard</h3>
+        <p>Real-time authority insights: total complaints, distribution, high-risk zones, and resolution status.</p>
+      </div>
+      <div class="feat-card fc-wide" data-aos data-aos-delay="50">
+        <div class="fc-glow fc-glow-purple"></div>
+        <div class="fc-num">06 — 08</div>
+        <div class="fc-icon-box fi-purple">🗣️</div>
+        <h3>Voice, Multilingual &amp; Community Alerts</h3>
+        <p>Report by voice in English, Hindi, Kannada, Tamil, or Telugu. Auto-community alerts when an area spikes in complaints.</p>
+        <div class="lang-pills">
+          <span>ENG</span><span>हिन्दी</span><span>ಕನ್ನಡ</span><span>தமிழ்</span><span>తెలుగు</span>
+        </div>
+      </div>
+    </div>
   </div>
+</section>
 
-  <div class="tab-row">
-    <button class="tab-btn active" id="tabLogin" onclick="showTab('login')">Sign In</button>
-    <button class="tab-btn" id="tabRegister" onclick="showTab('register')">Create Account</button>
+<!-- ══ HOW IT WORKS ══ -->
+<section class="how-section" id="how">
+  <div class="container">
+    <div class="section-eyebrow" data-aos>✦ WORKFLOW</div>
+    <h2 class="section-title" data-aos data-aos-delay="100">How it <span class="gradient-word">works.</span></h2>
+    <div class="steps-row">
+      <div class="step-item" data-aos data-aos-delay="0">
+        <div class="step-ring">01</div>
+        <div class="step-connector"></div>
+        <h4>Citizen Reports</h4>
+        <p>Submit via text, voice, or image from anywhere.</p>
+      </div>
+      <div class="step-item" data-aos data-aos-delay="100">
+        <div class="step-ring">02</div>
+        <div class="step-connector"></div>
+        <h4>AI Analyzes</h4>
+        <p>Classifies, prioritizes, assigns to the right department.</p>
+      </div>
+      <div class="step-item" data-aos data-aos-delay="200">
+        <div class="step-ring">03</div>
+        <div class="step-connector"></div>
+        <h4>Map Updates</h4>
+        <p>Issue pinned live on the civic map with risk zone.</p>
+      </div>
+      <div class="step-item" data-aos data-aos-delay="300">
+        <div class="step-ring">04</div>
+        <div class="step-connector"></div>
+        <h4>Authority Acts</h4>
+        <p>Municipal teams receive structured analytics to act fast.</p>
+      </div>
+      <div class="step-item" data-aos data-aos-delay="400">
+        <div class="step-ring">05</div>
+        <h4>Community Safe</h4>
+        <p>Resolved issues update the heatmap. City gets safer.</p>
+      </div>
+    </div>
   </div>
+</section>
 
-  <!-- LOGIN PANEL -->
-  <div id="panelLogin">
-    <div class="alert-box" id="loginAlert"></div>
-    <div class="form-group">
-      <label class="form-label">Email Address</label>
-      <input type="email" class="form-input" id="lEmail" placeholder="you@example.com">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Password</label>
-      <div class="pw-wrap">
-        <input type="password" class="form-input" id="lPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
-        <button class="pw-toggle" onclick="togglePw('lPass',this)">👁</button>
+<!-- ══ COMMUNITY / IMPACT ══ -->
+<section class="community-section" id="community">
+  <div class="container">
+    <div class="community-grid">
+      <div class="comm-left" data-aos>
+        <div class="section-eyebrow">✦ WHO IT'S FOR</div>
+        <h2 class="section-title">Built for<br><span class="gradient-word">everyone.</span></h2>
+        <div class="user-list">
+          <div class="user-item"><span class="ui-num">01</span><span class="ui-label">Citizens</span></div>
+          <div class="user-item"><span class="ui-num">02</span><span class="ui-label">Municipal Authorities</span></div>
+          <div class="user-item"><span class="ui-num">03</span><span class="ui-label">Village Administrations</span></div>
+          <div class="user-item"><span class="ui-num">04</span><span class="ui-label">City Planners</span></div>
+          <div class="user-item"><span class="ui-num">05</span><span class="ui-label">Emergency Services</span></div>
+        </div>
+      </div>
+      <div class="comm-right" data-aos data-aos-delay="100">
+        <div class="section-eyebrow">✦ REAL IMPACT</div>
+        <h2 class="section-title">Transforming<br><span class="gradient-word">civic data.</span></h2>
+        <div class="impact-boxes">
+          <div class="impact-box"><div class="ib-val">24/7</div><div class="ib-lbl">City monitoring, always on</div></div>
+          <div class="impact-box"><div class="ib-val">AI</div><div class="ib-lbl">Driven issue prioritization</div></div>
+          <div class="impact-box"><div class="ib-val">5×</div><div class="ib-lbl">Faster infrastructure resolution</div></div>
+          <div class="impact-box"><div class="ib-val">∞</div><div class="ib-lbl">Scales to any city or village</div></div>
+        </div>
       </div>
     </div>
-    <button class="btn-submit" id="btnLogin" onclick="doLogin()">
-      <span id="btnLoginText">Sign In to Platform</span>
-      <div class="shimmer"></div>
-    </button>
-    <p class="switch-text">No account? <span onclick="showTab('register')">Create one →</span></p>
   </div>
+</section>
 
-  <!-- REGISTER PANEL -->
-  <div id="panelRegister" style="display:none">
-    <div class="alert-box" id="regAlert"></div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Full Name</label>
-        <input type="text" class="form-input" id="rName" placeholder="Arjun Sharma">
-      </div>
-      <div class="form-group">
-        <label class="form-label">City / Village</label>
-        <input type="text" class="form-input" id="rCity" placeholder="Bengaluru">
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Email Address</label>
-      <input type="email" class="form-input" id="rEmail" placeholder="you@example.com">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Role</label>
-      <select class="form-select" id="rRole">
-        <option value="citizen">Citizen</option>
-        <option value="authority">Municipal Authority</option>
-        <option value="admin">Admin</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Password</label>
-      <div class="pw-wrap">
-        <input type="password" class="form-input" id="rPass" placeholder="Create a strong password" onkeydown="if(event.key==='Enter')doRegister()">
-        <button class="pw-toggle" onclick="togglePw('rPass',this)">👁</button>
-      </div>
-    </div>
-    <button class="btn-submit" id="btnReg" onclick="doRegister()">
-      <span id="btnRegText">Create My Account</span>
-      <div class="shimmer"></div>
-    </button>
-    <p class="switch-text">Already a member? <span onclick="showTab('login')">Sign in →</span></p>
+<!-- ══ SOS BANNER ══ -->
+<div class="sos-banner" data-aos>
+  <div class="sos-ring-outer"></div>
+  <div class="sos-ring-inner"></div>
+  <div class="sos-content">
+    <div class="sos-kicker">EMERGENCY FEATURE</div>
+    <h3 class="sos-title">One Tap. Instant Help.</h3>
+    <p class="sos-desc">Our SOS system detects your location and alerts emergency responders immediately — anywhere, anytime.</p>
+    <button class="sos-btn" onclick="openModal('register')">🆘 Try the Demo</button>
   </div>
 </div>
 
-<script>
-// Animated BG Canvas
-(function(){
-  const c=document.getElementById('bg'),ctx=c.getContext('2d');
-  let W,H,pts=[];
-  function init(){W=c.width=innerWidth;H=c.height=innerHeight;pts=Array.from({length:120},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.2+0.3,s:Math.random()*0.2+0.05,ph:Math.random()*Math.PI*2}));}
-  function draw(ts){
-    ctx.clearRect(0,0,W,H);
-    [{x:W*.15,y:H*.3,r:400,c:'0,229,255'},{x:W*.85,y:H*.5,r:340,c:'155,93,229'}].forEach(n=>{
-      const g=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r);
-      g.addColorStop(0,`rgba(${n.c},0.06)`);g.addColorStop(1,`rgba(${n.c},0)`);
-      ctx.fillStyle=g;ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fill();
-    });
-    pts.forEach(p=>{const a=0.3+0.5*Math.sin(p.ph+ts*.001*p.s);ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(210,225,255,${a})`;ctx.fill();});
-    requestAnimationFrame(draw);
-  }
-  init();requestAnimationFrame(draw);window.addEventListener('resize',init);
-})();
+<!-- ══ ROADMAP ══ -->
+<section class="roadmap-section" id="roadmap">
+  <div class="container">
+    <div class="section-eyebrow" data-aos>✦ FUTURE ROADMAP</div>
+    <h2 class="section-title" data-aos data-aos-delay="100">What's coming<br><span class="gradient-word">next.</span></h2>
+    <div class="roadmap-grid">
+      <div class="rm-card" data-aos data-aos-delay="0">
+        <div class="rm-num">01</div><div class="rm-emoji">📷</div>
+        <h4>Image Recognition</h4>
+        <p>Auto-detect pothole severity from citizen-uploaded photos using computer vision.</p>
+      </div>
+      <div class="rm-card" data-aos data-aos-delay="100">
+        <div class="rm-num">02</div><div class="rm-emoji">🔮</div>
+        <h4>Predictive AI</h4>
+        <p>Forecast infrastructure failures before they happen using historical data analysis.</p>
+      </div>
+      <div class="rm-card" data-aos data-aos-delay="200">
+        <div class="rm-num">03</div><div class="rm-emoji">📱</div>
+        <h4>Mobile Apps</h4>
+        <p>Native iOS and Android apps for seamless on-the-go civic reporting.</p>
+      </div>
+      <div class="rm-card" data-aos data-aos-delay="300">
+        <div class="rm-num">04</div><div class="rm-emoji">📡</div>
+        <h4>Offline Reporting</h4>
+        <p>SMS/USSD channels for deep rural areas with limited internet connectivity.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-// Check if already logged in
-if(localStorage.getItem('rn_token')) window.location.href='/frontend/dashboard.html';
+<!-- ══ CTA ══ -->
+<section class="cta-section">
+  <div class="cta-glow"></div>
+  <div class="container cta-inner" data-aos>
+    <h2 class="cta-title">Ready to protect<br><span class="gradient-word">your community?</span></h2>
+    <p class="cta-sub">Join Raksha Nethra and turn civic complaints into real change.</p>
+    <button class="btn-primary btn-large" onclick="openModal('register')">
+      <span>Create Free Account</span>
+      <div class="btn-shimmer"></div>
+    </button>
+  </div>
+</section>
 
-function showTab(tab) {
-  const isLogin = tab==='login';
-  document.getElementById('tabLogin').classList.toggle('active',isLogin);
-  document.getElementById('tabRegister').classList.toggle('active',!isLogin);
-  document.getElementById('panelLogin').style.display = isLogin?'block':'none';
-  document.getElementById('panelRegister').style.display = isLogin?'none':'block';
-  clearAlerts();
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand-col">
+        <div class="footer-logo">
+          <div class="logo-orb"></div>
+          <span>Raksha Nethra</span>
+        </div>
+        <p class="footer-tagline">"An intelligent eye for protecting communities through technology."</p>
+        <div class="footer-langs">
+          <span>ENG</span><span>हिन्दी</span><span>ಕನ್ನಡ</span><span>தமிழ்</span><span>తెలుగు</span>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <a href="#features">Features</a>
+        <a href="#how">Workflow</a>
+        <a href="#roadmap">Roadmap</a>
+      </div>
+      <div class="footer-col">
+        <h4>Community</h4>
+        <a href="#community">Users</a>
+        <a href="javascript:void(0)" onclick="openModal('register')">Register</a>
+        <a href="javascript:void(0)" onclick="openModal('login')">Sign In</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Contact Us</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 Raksha Nethra. Built for safer communities.</span>
+      <span>AI · Maps · Safety · Community</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ══ AUTH MODAL ══ -->
+<div class="modal-overlay" id="authOverlay" onclick="overlayClick(event)">
+  <div class="modal-box" id="modalBox">
+    <div class="modal-bg-glow"></div>
+    <div class="modal-header">
+      <div class="modal-logo">
+        <div class="logo-orb small"></div>
+        <span>Raksha Nethra</span>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+      <button class="modal-tab" id="tabRegister" onclick="switchTab('register')">Register</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="panelLogin" class="modal-panel">
+      <div id="alertLogin" class="modal-alert"></div>
+      <div class="mf-group">
+        <label>Email Address</label>
+        <input type="email" id="lEmail" placeholder="citizen@example.com">
+      </div>
+      <div class="mf-group">
+        <label>Password</label>
+        <div class="pw-field">
+          <input type="password" id="lPass" placeholder="••••••••">
+          <button class="pw-eye" onclick="togglePw('lPass',this)">👁</button>
+        </div>
+      </div>
+      <div class="mf-row-between">
+        <label class="mf-check"><input type="checkbox"> Remember me</label>
+        <span class="link-accent">Forgot password?</span>
+      </div>
+      <button class="btn-modal-submit" onclick="doLogin()">Sign In to Platform</button>
+      <div class="divider-or"><span>or continue with</span></div>
+      <div class="social-row">
+        <button class="social-btn">🌐 Google</button>
+        <button class="social-btn">📱 Mobile OTP</button>
+      </div>
+      <p class="modal-switch-text">No account? <span onclick="switchTab('register')">Create one →</span></p>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="panelRegister" class="modal-panel" style="display:none">
+      <div id="alertRegister" class="modal-alert"></div>
+      <div class="mf-row">
+        <div class="mf-group"><label>First Name</label><input type="text" id="rFirst" placeholder="Arjun"></div>
+        <div class="mf-group"><label>Last Name</label><input type="text" id="rLast" placeholder="Sharma"></div>
+      </div>
+      <div class="mf-group"><label>Email Address</label><input type="email" id="rEmail" placeholder="citizen@example.com"></div>
+      <div class="mf-row">
+        <div class="mf-group"><label>Mobile</label><input type="tel" id="rPhone" placeholder="+91 98765 43210"></div>
+        <div class="mf-group"><label>City / Village</label><input type="text" id="rCity" placeholder="Bengaluru"></div>
+      </div>
+      <div class="mf-group">
+        <label>Your Role</label>
+        <select id="rRole">
+          <option value="">Select role</option>
+          <option>Citizen</option>
+          <option>Municipal Authority</option>
+          <option>Village Admin</option>
+          <option>City Planner</option>
+          <option>Emergency Services</option>
+        </select>
+      </div>
+      <div class="mf-group">
+        <label>Password</label>
+        <div class="pw-field">
+          <input type="password" id="rPass" placeholder="Create a strong password" oninput="checkStrength(this.value)">
+          <button class="pw-eye" onclick="togglePw('rPass',this)">👁</button>
+        </div>
+        <div class="strength-bar">
+          <div class="sb-seg" id="sb1"></div><div class="sb-seg" id="sb2"></div>
+          <div class="sb-seg" id="sb3"></div><div class="sb-seg" id="sb4"></div>
+        </div>
+      </div>
+      <button class="btn-modal-submit" onclick="doRegister()">Create My Account</button>
+      <p class="modal-switch-text">Already a member? <span onclick="switchTab('login')">Sign in →</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- FIREBASE + FASTAPI DUAL AUTH -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAcB-99MP7Oq9f2vZ979bnjt3Geb6rjrhE",
+  authDomain: "database-25a5b.firebaseapp.com",
+  projectId: "database-25a5b",
+  storageBucket: "database-25a5b.firebasestorage.app",
+  messagingSenderId: "562972874228",
+  appId: "1:562972874228:web:aee5d889ce153e4f7295a1"
+};
+
+const fbApp  = initializeApp(firebaseConfig);
+const auth   = getAuth(fbApp);
+const db     = getFirestore(fbApp);
+
+const API = 'http://127.0.0.1:8000';
+
+/* ── FastAPI helpers ── */
+async function apiRegister(name, email, password, role, city) {
+  const res = await fetch(`${API}/auth/register`, {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ name, email, password, role: role.toLowerCase(), city })
+  });
+  return res.ok ? res.json() : null;
 }
-function clearAlerts(){['loginAlert','regAlert'].forEach(id=>{const el=document.getElementById(id);if(el){el.className='alert-box';el.textContent='';}})}
-function showAlert(id,msg,type){const el=document.getElementById(id);el.textContent=msg;el.className=`alert-box show ${type}`;}
-function togglePw(id,btn){const inp=document.getElementById(id);inp.type=inp.type==='password'?'text':'password';btn.textContent=inp.type==='password'?'👁':'🙈';}
 
-async function doLogin() {
-  const email=document.getElementById('lEmail').value.trim();
-  const pass=document.getElementById('lPass').value;
-  if(!email||!pass){showAlert('loginAlert','Please fill in all fields.','error');return;}
-  const btn=document.getElementById('btnLogin');
-  const btnTxt=document.getElementById('btnLoginText');
-  btn.disabled=true;btnTxt.textContent='Signing In...';
-  try {
-    const res = await fetch('http://127.0.0.1:8000/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})});
-    const data = await res.json();
-    if(!res.ok) throw new Error(data.detail||'Login failed');
-    localStorage.setItem('rn_token', data.access_token);
-    localStorage.setItem('rn_user', JSON.stringify(data.user));
-    showAlert('loginAlert','✓ Signed in successfully! Redirecting...','success');
-    setTimeout(()=>window.location.href='/frontend/dashboard.html',900);
-  } catch(e) {
-    showAlert('loginAlert','⚠ '+e.message,'error');
-    btn.disabled=false;btnTxt.textContent='Sign In to Platform';
-  }
+async function apiLogin(email, password) {
+  const form = new URLSearchParams({ username: email, password });
+  const res = await fetch(`${API}/auth/login`, {
+    method: 'POST', headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: form
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data;
 }
 
+function saveSession(token, user) {
+  localStorage.setItem('rn_token', token);
+  localStorage.setItem('rn_user', JSON.stringify(user));
+}
+
+/* ── UI helpers ── */
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg; el.className = `modal-alert show ${type}`;
+}
+function clearAlert(id) {
+  const el = document.getElementById(id);
+  if (el) el.className = 'modal-alert';
+}
+
+/* ── REGISTER ── */
 async function doRegister() {
-  const name=document.getElementById('rName').value.trim();
-  const city=document.getElementById('rCity').value.trim();
-  const email=document.getElementById('rEmail').value.trim();
-  const role=document.getElementById('rRole').value;
-  const pass=document.getElementById('rPass').value;
-  if(!name||!email||!pass){showAlert('regAlert','Please fill all required fields.','error');return;}
-  const btn=document.getElementById('btnReg');
-  const btnTxt=document.getElementById('btnRegText');
-  btn.disabled=true;btnTxt.textContent='Creating Account...';
+  const first = document.getElementById('rFirst').value.trim();
+  const last  = document.getElementById('rLast').value.trim();
+  const email = document.getElementById('rEmail').value.trim();
+  const phone = document.getElementById('rPhone').value.trim();
+  const city  = document.getElementById('rCity').value.trim();
+  const role  = document.getElementById('rRole').value;
+  const pass  = document.getElementById('rPass').value;
+
+  if (!first || !last || !email || !phone || !city || !role || !pass) {
+    showAlert('alertRegister', '⚠ Please complete all fields.', 'er'); return;
+  }
+
+  const btn = document.querySelector('#panelRegister .btn-modal-submit');
+  btn.textContent = "Creating Account..."; btn.disabled = true;
+
   try {
-    const res = await fetch('http://127.0.0.1:8000/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password:pass,role,city})});
-    const data = await res.json();
-    if(!res.ok) throw new Error(data.detail||'Registration failed');
-    showAlert('regAlert','✓ Account created! Please sign in.','success');
-    setTimeout(()=>{showTab('login');document.getElementById('lEmail').value=email;},1500);
-  } catch(e) {
-    showAlert('regAlert','⚠ '+e.message,'error');
-  } finally {
-    btn.disabled=false;btnTxt.textContent='Create My Account';
+    // 1. Firebase Auth
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    const user = cred.user;
+
+    // 2. Firestore
+    await setDoc(doc(db, "users", user.uid), {
+      firstName: first, lastName: last, email, phone, city, role,
+      createdAt: new Date()
+    });
+
+    // 3. FastAPI backend — register (best effort)
+    await apiRegister(`${first} ${last}`, email, pass, role, city);
+
+    // 4. FastAPI login to get JWT
+    const tokenData = await apiLogin(email, pass);
+    if (tokenData?.access_token) {
+      saveSession(tokenData.access_token, { name: `${first} ${last}`, email, role, city });
+      showAlert('alertRegister', `✓ Account created! Redirecting to dashboard...`, 'ok');
+      setTimeout(() => { window.location.href = '/frontend/dashboard.html'; }, 1500);
+    } else {
+      showAlert('alertRegister', `✓ Account created for ${first}! Please sign in.`, 'ok');
+      setTimeout(() => {
+        switchTab('login');
+        document.getElementById('lEmail').value = email;
+        btn.textContent = "Create My Account"; btn.disabled = false;
+      }, 2000);
+    }
+  } catch (error) {
+    btn.textContent = "Create My Account"; btn.disabled = false;
+    if (error.code === 'auth/email-already-in-use') {
+      showAlert('alertRegister', '⚠ This email is already registered. Please sign in.', 'er');
+    } else {
+      showAlert('alertRegister', `⚠ ${error.message}`, 'er');
+    }
   }
 }
+
+/* ── LOGIN ── */
+async function doLogin() {
+  const email = document.getElementById('lEmail').value.trim();
+  const pass  = document.getElementById('lPass').value;
+  if (!email || !pass) { showAlert('alertLogin', '⚠ Please fill in all fields.', 'er'); return; }
+
+  const btn = document.querySelector('#panelLogin .btn-modal-submit');
+  btn.textContent = "Signing In..."; btn.disabled = true;
+
+  try {
+    // 1. Firebase Auth
+    const cred = await signInWithEmailAndPassword(auth, email, pass);
+
+    // 2. FastAPI JWT
+    const tokenData = await apiLogin(email, pass);
+    if (tokenData?.access_token) {
+      const name = cred.user.displayName || email.split('@')[0];
+      saveSession(tokenData.access_token, { name, email, role: 'citizen', city: '' });
+      showAlert('alertLogin', '✓ Signed in! Redirecting to dashboard...', 'ok');
+      setTimeout(() => { window.location.href = '/frontend/dashboard.html'; }, 1200);
+    } else {
+      // Firebase OK but FastAPI user may not exist — redirect anyway
+      showAlert('alertLogin', '✓ Signed in via Firebase! Redirecting...', 'ok');
+      const name = cred.user.displayName || email.split('@')[0];
+      // Create a minimal session so sidebar works
+      localStorage.setItem('rn_token', 'firebase_' + cred.user.uid);
+      localStorage.setItem('rn_user', JSON.stringify({ name, email, role: 'citizen', city: '' }));
+      setTimeout(() => { window.location.href = '/frontend/dashboard.html'; }, 1200);
+    }
+  } catch (error) {
+    btn.textContent = "Sign In to Platform"; btn.disabled = false;
+    showAlert('alertLogin', '⚠ Invalid email or password.', 'er');
+  }
+}
+
+/* ── GLOBAL EXPORTS ── */
+window.doLogin    = doLogin;
+window.doRegister = doRegister;
+window.toggleMenu  = () => document.getElementById('mobileMenu').classList.toggle('open');
+window.scroll2     = id => document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+window.openModal   = tab => { document.getElementById('authOverlay').classList.add('open'); switchTab(tab); };
+window.closeModal  = () => document.getElementById('authOverlay').classList.remove('open');
+window.overlayClick = e => { if (e.target === e.currentTarget) window.closeModal(); };
+window.switchTab   = tab => {
+  const isL = tab === 'login';
+  document.getElementById('tabLogin').classList.toggle('active', isL);
+  document.getElementById('tabRegister').classList.toggle('active', !isL);
+  document.getElementById('panelLogin').style.display    = isL ? 'block' : 'none';
+  document.getElementById('panelRegister').style.display = isL ? 'none'  : 'block';
+  clearAlert('alertLogin'); clearAlert('alertRegister');
+};
+window.togglePw = (id, btn) => {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+};
+window.checkStrength = val => {
+  let s = 0;
+  if (val.length >= 6) s++;
+  if (val.length >= 10) s++;
+  if (/[A-Z]/.test(val) && /\d/.test(val)) s++;
+  if (/[^A-Za-z0-9]/.test(val)) s++;
+  const colors = ['#ff3b5c','#ff3b5c','#ffc107','#00ff88'];
+  [1,2,3,4].forEach(i => {
+    const sb = document.getElementById('sb'+i);
+    if (sb) sb.style.background = i <= s ? colors[s-1] : 'rgba(255,255,255,0.08)';
+  });
+};
+
+/* ── ANIMATIONS ── */
+const cursor  = document.getElementById('cursor');
+const trail   = document.getElementById('cursor-trail');
+let mx=0, my=0, tx=0, ty=0;
+if (cursor && trail) {
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx+'px'; cursor.style.top = my+'px';
+  });
+  (function animT() {
+    tx += (mx-tx)*0.14; ty += (my-ty)*0.14;
+    trail.style.left = tx+'px'; trail.style.top = ty+'px';
+    requestAnimationFrame(animT);
+  })();
+}
+
+const bgCanvas = document.getElementById('bg-canvas');
+if (bgCanvas) {
+  const ctx2 = bgCanvas.getContext('2d');
+  let W, H, pts = [], nbs = [];
+  function initC() {
+    W = bgCanvas.width = window.innerWidth; H = bgCanvas.height = window.innerHeight;
+    pts = Array.from({length:160}, () => ({ x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.4+0.3, speed:Math.random()*0.25+0.05, phase:Math.random()*Math.PI*2 }));
+    nbs = [{x:W*0.12,y:H*0.25,r:420,c:'0,229,255'},{x:W*0.88,y:H*0.5,r:360,c:'155,93,229'},{x:W*0.5,y:H*0.85,r:280,c:'255,59,92'}];
+  }
+  function drawC(ts) {
+    ctx2.clearRect(0,0,W,H);
+    nbs.forEach(n => {
+      const g = ctx2.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r);
+      g.addColorStop(0,`rgba(${n.c},0.055)`); g.addColorStop(1,`rgba(${n.c},0)`);
+      ctx2.fillStyle=g; ctx2.beginPath(); ctx2.arc(n.x,n.y,n.r,0,Math.PI*2); ctx2.fill();
+    });
+    pts.forEach(p => {
+      const a = 0.3+0.5*Math.sin(p.phase+ts*0.001*p.speed);
+      ctx2.beginPath(); ctx2.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx2.fillStyle=`rgba(210,225,255,${a})`; ctx2.fill();
+    });
+    requestAnimationFrame(drawC);
+  }
+  initC(); requestAnimationFrame(drawC);
+  window.addEventListener('resize', initC);
+}
+
+const nb = document.getElementById('navbar');
+if (nb) window.addEventListener('scroll', () => nb.classList.toggle('scrolled', window.scrollY > 60));
+
+const dw = document.getElementById('dashWrapper'), d3 = document.getElementById('dash3d');
+if (dw && d3) {
+  dw.addEventListener('mousemove', e => {
+    const r=dw.getBoundingClientRect();
+    d3.style.transform = `rotateX(${((e.clientY-r.top-r.height/2)/(r.height/2))*-7}deg) rotateY(${((e.clientX-r.left-r.width/2)/(r.width/2))*7}deg)`;
+  });
+  dw.addEventListener('mouseleave', () => d3.style.transform = 'rotateX(0) rotateY(0)');
+}
+
+function animCount(el) {
+  const t=+el.dataset.count, dur=1600, s=performance.now();
+  (function step(now){ const p=Math.min((now-s)/dur,1), e=1-Math.pow(1-p,3); el.textContent=Math.round(e*t); if(p<1) requestAnimationFrame(step); })(s);
+}
+const ao = document.querySelectorAll('[data-aos]');
+if (ao.length) {
+  new IntersectionObserver(entries => entries.forEach(en => {
+    if(en.isIntersecting){
+      const el=en.target, d=+(el.dataset.aosDelay||0);
+      setTimeout(()=>{ el.classList.add('aosIn'); el.querySelectorAll('.stat-num[data-count]').forEach(animCount); }, d);
+    }
+  }), {threshold:0.12}).observe = function(el){ this._observe(el); };
+  const obs = new IntersectionObserver(entries => entries.forEach(en => {
+    if(en.isIntersecting){ const el=en.target,d=+(el.dataset.aosDelay||0); setTimeout(()=>{ el.classList.add('aosIn'); el.querySelectorAll('.stat-num[data-count]').forEach(animCount); },d); obs.unobserve(el); }
+  }),{threshold:0.12});
+  ao.forEach(el=>obs.observe(el));
+}
+window.addEventListener('load', () => document.querySelectorAll('.stat-num[data-count]').forEach(animCount));
 </script>
 </body>
 </html>
